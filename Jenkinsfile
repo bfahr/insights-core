@@ -1,7 +1,6 @@
 pipeline {
   agent none
   stages {
-    stage('Build and Test Insights Core') {
         stage('Build RHEL7 Python 2.7') {
           agent {
             docker {
@@ -17,6 +16,5 @@ pipeline {
             sh 'flake8'
           }
         }
-      }
-    }
+  }
 }
