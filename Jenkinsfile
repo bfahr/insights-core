@@ -4,12 +4,10 @@ pipeline {
         stage('Build RHEL7 Python 2.7') {
           agent {
             docker {
-              image 'centos'
+              image 'bfahr/centos'
             }
           }
           steps {
-            echo "Installing Supporting files"
-            sh 'yum install -y python2-pip'
             echo "Installing Insights..."
             sh 'pip install --user -e .[develop]'
             echo "Testing with Pytest..."
