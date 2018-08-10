@@ -8,6 +8,8 @@ pipeline {
             }
           }
           steps {
+            echo "Installing Supporting files"
+            sh 'yum install -y python2-pip'
             echo "Installing Insights..."
             sh 'pip install --user -e .[develop]'
             echo "Testing with Pytest..."
