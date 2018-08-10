@@ -8,8 +8,6 @@ pipeline {
             }
           }
           steps {
-            sh 'pwd'
-            sh 'whoami'
             sh 'virtualenv -p /usr/bin/python2 .'
             sh 'source bin/activate'
             echo "Installing Insights..."
