@@ -13,7 +13,7 @@ pipeline {
             sh 'virtualenv -p /usr/bin/python2 .'
             sh 'source bin/activate'
             echo "Installing Insights..."
-            sh 'pip install --user -e .[develop]'
+            sh 'pip install -e .[develop]'
             echo "Testing with Pytest..."
             sh 'pytest'
             echo "Testing with flake8..."   
