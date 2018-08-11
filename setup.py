@@ -88,8 +88,8 @@ if __name__ == "__main__":
         package_data={'': ['LICENSE']},
         license='Apache 2.0',
         extras_require={
-            'flake8' : list(flake8 | client),
-            'testing' : list(testing | client),
+            'flake8': list(flake8 | client),
+            'testing': list(testing | client),
             'develop': list(runtime | develop | flake8 | testing | client),
             'client': list(runtime | client),
             'optional': list(optional),
