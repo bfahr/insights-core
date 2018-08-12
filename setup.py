@@ -43,12 +43,15 @@ client = set([
 ])
 
 develop = set([
-    'Sphinx',
-    'nbsphinx==0.3.1',
-    'sphinx_rtd_theme',
     'futures==3.0.5',
     'requests==2.13.0',
     'wheel',
+])
+
+docs = set([
+    'Sphinx',
+    'nbsphinx==0.3.1',
+    'sphinx_rtd_theme',
     'ipython<6',
 ])
 
@@ -88,9 +91,10 @@ if __name__ == "__main__":
         package_data={'': ['LICENSE']},
         license='Apache 2.0',
         extras_require={
+            'docs': list(docs),
             'flake8': list(flake8 | client),
             'testing': list(testing | client),
-            'develop': list(runtime | develop | flake8 | testing | client),
+            'develop': list(runtime | develop | docs | flake8 | testing | client),
             'client': list(runtime | client),
             'optional': list(optional),
         },

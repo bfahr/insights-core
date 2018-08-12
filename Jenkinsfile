@@ -31,5 +31,20 @@ pipeline {
             sh 'flake8'
           }
         }
+        stage('Documents RHEL7 Python 2.7') {
+          agent {
+            docker {
+              image 'bfahr/centos'
+            }
+          }
+          steps {
+            sh 'virtualenv -p /usr/bin/python2 .'
+            sh 'source bin/activate'
+            echo "Installing Insights..."
+            sh 'pip install -e .[docs]'
+            echo "Building Docs..."   
+            sh 'sphinx-build -W -b html -qa -E docs docs/_build/html'
+          }
+        }
   }
 }
