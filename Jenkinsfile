@@ -13,7 +13,7 @@ pipeline {
             echo "Installing Insights..."
             sh 'pip install -e .[testing]'
             echo "Testing with Pytest..."
-            sh 'which pytest'
+            sh 'command -v pytest'
             sh 'pytest'
           }
         }
