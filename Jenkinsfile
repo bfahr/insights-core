@@ -9,16 +9,16 @@ pipeline {
           }
           steps {
             echo "Installing Insights..."
-            sh '''
-                virtualenv -p /usr/bin/python2 .
-                source bin/activate'
+            sh """
+                virtualenv -p /usr/bin/python2 .env
+                source .env/bin/activate
                 pip install -e .[testing]
-            '''
+            """
             echo "Testing with Pytest..."
-            sh '''
-                source bin/activate
+            sh """
+                source .env/bin/activate
                 pytest
-            '''
+            """
           }
         }
         stage('Flake8 RHEL7 Python 2.7') {
