@@ -28,12 +28,17 @@ pipeline {
             }
           }
           steps {
-            sh 'virtualenv -p /usr/bin/python2 .'
-            sh 'source bin/activate'
             echo "Installing Insights..."
-            sh 'pip install -e .[flake8]'
+            sh """
+                virtualenv -p /usr/bin/python2 .env
+                source .env/bin/activate
+                pip install -e .[flake8]
+            """
             echo "Testing with flake8..."   
-            sh 'flake8'
+            sh """
+                source .env/bin/activate
+                flake8
+            """
           }
         }
         stage('Documents RHEL7 Python 2.7') {
@@ -43,12 +48,17 @@ pipeline {
             }
           }
           steps {
-            sh 'virtualenv -p /usr/bin/python2 .'
-            sh 'source bin/activate'
             echo "Installing Insights..."
-            sh 'pip install -e .[docs]'
+            sh """
+                virtualenv -p /usr/bin/python2 .env
+                source .env/bin/activate
+                pip install -e .[docs]
+            """
             echo "Building Docs..."   
-            sh 'sphinx-build -W -b html -qa -E docs docs/_build/html'
+            sh """
+                source .env/bin/activate
+                sphinx-build -W -b html -qa -E docs docs/_build/html
+            """
           }
         }
   }
