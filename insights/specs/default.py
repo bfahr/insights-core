@@ -8,9 +8,12 @@ this file with the same `name` keyword argument. This allows overriding the
 data sources that standard Insights `Parsers` resolve against.
 """
 
+import glob
+import json
 import logging
 import os
 import re
+import sys
 
 from insights.core.context import ClusterArchiveContext
 from insights.core.context import DockerImageContext
@@ -37,6 +40,18 @@ from grp import getgrgid
 from os import stat
 from pwd import getpwuid
 
+# Since XPath expression is not supported by the ElementTree in Python 2.6,
+# import insights.contrib.ElementTree when running python is prior to 2.6 for compatibility.
+# Script insights.contrib.ElementTree is the same with xml.etree.ElementTree in Python 2.7.14
+# Otherwise, import defusedxml.ElementTree to avoid XML vulnerabilities,
+# if dependency not installed import xml.etree.ElementTree instead.
+if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
+    import insights.contrib.ElementTree as ET
+else:
+    try:
+        import defusedxml.ElementTree as ET
+    except:
+        import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
@@ -437,7 +452,6 @@ class DefaultSpecs(Specs):
 
     @datasource(Mount)
     def httpd_on_nfs(broker):
-        import json
         mnt = broker[Mount]
         mps = mnt.search(mount_type='nfs4')
         # get nfs 4.0 mount points
@@ -465,7 +479,41 @@ class DefaultSpecs(Specs):
     ifcfg = glob_file("/etc/sysconfig/network-scripts/ifcfg-*")
     ifcfg_static_route = glob_file("/etc/sysconfig/network-scripts/route-*")
     ifconfig = simple_command("/sbin/ifconfig -a")
-    imagemagick_policy = glob_file(["/etc/ImageMagick/policy.xml", "/usr/lib*/ImageMagick-6.5.4/config/policy.xml"])
+    """
+    imagemagick_policy = glob_file([
+        "/etc/ImageMagick/policy.xml",
+        "/usr/lib*/ImageMagick-6.5.4/config/policy.xml",
+        "/etc/ImageMagick-6/policy.xml"])
+    """
+    @datasource(context=HostContext)
+    def imagemagick_policy(broker):
+        policy_files = ['/etc/ImageMagick-6/policy.xml', '/tmp/ImageMagick/policy.xml']
+        policy_globs = '/usr/lib*/ImageMagick-6.5.4/config/policy.xml'
+        policy_files.extend(glob.glob(policy_globs))
+        datasources = []
+        for f in policy_files:
+            if os.path.isfile(f):
+                relative_path = f
+                policies = []
+                with open(f, 'r') as fh:
+                    content = fh.read()
+                    try:
+                        dom = ET.fromstring(content)
+                        for e in dom.findall('.//policy'):
+                            if 'name' in e.attrib and e.attrib['name'] == 'shared-secret' and 'value' in e.attrib:
+                                e.set('value', '*' * len(e.attrib['value']))
+                            policies.append(e.attrib)
+                    except Exception as e:
+                        continue
+
+                    if policies:
+                        datasources.append(DatasourceProvider(content=json.dumps(policies), relative_path=relative_path))
+
+        if not datasources:
+            raise SkipComponent()
+
+        return datasources
+
     init_ora = simple_file("${ORACLE_HOME}/dbs/init.ora")
     initscript = glob_file(r"etc/rc.d/init.d/*")
     init_process_cgroup = simple_file("/proc/1/cgroup")

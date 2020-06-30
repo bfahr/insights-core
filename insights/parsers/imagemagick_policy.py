@@ -3,14 +3,15 @@ ImageMagickPolicy - files ``/etc/ImageMagick/policy.xml`` and ``/usr/lib*/ImageM
 ===============================================================================================================
 """
 
-from insights.core import XMLParser
+import json
+from insights.core import Parser
 from insights.core.plugins import parser
 from insights.parsers import SkipException
 from insights.specs import Specs
 
 
 @parser(Specs.imagemagick_policy)
-class ImageMagickPolicy(XMLParser):
+class ImageMagickPolicy(Parser):
     """
     Class for parsing the ``/etc/ImageMagick/policy.xml`` and ``/usr/lib*/ImageMagick-6.5.4/config/policy.xml``
     files.
@@ -65,8 +66,4 @@ class ImageMagickPolicy(XMLParser):
         if not content:
             raise SkipException("No content.")
 
-        try:
-            super(ImageMagickPolicy, self).parse_content(content)
-            self.policies = self.get_elements(".//policy")
-        except Exception:  # file without elements
-            self.policies = []
+        self.policies = json.loads(' '.join(content))
